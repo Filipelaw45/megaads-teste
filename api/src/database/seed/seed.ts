@@ -50,12 +50,6 @@ async function seed() {
 
   const clientData = [
     {
-      firstName: 'João',
-      lastName: 'Silva',
-      email: 'joao.silva@example.com',
-      cpfCnpj: '12345678901',
-    },
-    {
       firstName: 'Maria',
       lastName: 'Santos',
       email: 'maria.santos@example.com',
