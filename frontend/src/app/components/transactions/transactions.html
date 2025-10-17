@@ -14,7 +14,6 @@
         </button>
       </div>
 
-      <!-- Filtros -->
       <div class="mb-6 bg-white p-4 rounded-lg shadow-md">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
@@ -59,7 +58,6 @@
           </div>
         </div>
 
-        <!-- Indicador de filtros ativos -->
         <div
           *ngIf="filterKind || filterStatus || filterClientId"
           class="mt-4 flex items-center gap-2 flex-wrap"
@@ -98,13 +96,11 @@
         </div>
       </div>
 
-      <!-- Loading -->
       <div *ngIf="isLoading" class="text-center py-12">
         <i class="fas fa-spinner fa-spin text-4xl text-blue-600 mb-2"></i>
         <p class="text-gray-600 text-lg">Carregando...</p>
       </div>
 
-      <!-- Tabela de transações -->
       <div *ngIf="!isLoading" class="bg-white rounded-lg shadow-md overflow-x-auto">
         <table *ngIf="transactions.length > 0" class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
@@ -220,7 +216,6 @@
         </div>
       </div>
 
-      <!-- Paginação -->
       <div
         *ngIf="!isLoading && totalPages > 1"
         class="flex items-center justify-center gap-2 mt-8 flex-wrap"
@@ -261,7 +256,6 @@
     </div>
   </div>
 
-  <!-- Modal -->
   <div
     *ngIf="showModal"
     (click)="closeModal()"
