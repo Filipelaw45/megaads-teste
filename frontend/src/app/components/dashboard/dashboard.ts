@@ -1,73 +1,122 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { SidebarComponent } from '../layout/sidebar/sidebar';
+import { Router } from '@angular/router';
 import { TransactionService } from '../../services/transaction.service';
-import { TransactionKind, TransactionStatus } from '../../models/transaction.model';
+import { Transaction, TransactionKind, TransactionStatus } from '../../models/transaction.model';
+import { SidebarComponent } from '../layout/sidebar/sidebar';
+import { forkJoin } from 'rxjs';
 
 interface DashboardStats {
   totalReceivable: number;
   totalPayable: number;
-  overdueReceivable: number;
-  overduePayable: number;
+  totalOverdue: number;
 }
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, SidebarComponent],
+  imports: [CommonModule, SidebarComponent],
   templateUrl: './dashboard.html',
-  styleUrls: ['./dashboard.css'],
+  styleUrls: ['./dashboard.css']
 })
 export class DashboardComponent implements OnInit {
+  // Expor enums para o template
+  TransactionKind = TransactionKind;
+  TransactionStatus = TransactionStatus;
+
   stats: DashboardStats = {
     totalReceivable: 0,
     totalPayable: 0,
-    overdueReceivable: 0,
-    overduePayable: 0,
+    totalOverdue: 0
   };
   isLoading = true;
 
-  constructor(private transactionService: TransactionService) {}
+  constructor(
+    private transactionService: TransactionService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
-    this.loadStats();
+    this.loadDashboardData();
   }
 
-  loadStats(): void {
+  loadDashboardData(): void {
     this.isLoading = true;
 
-    // Carregar a receber
-    this.transactionService
-      .getTransactions(
+    // Buscar todas as transações pendentes em paralelo
+    forkJoin({
+      receivable: this.transactionService.getTransactions(
         TransactionKind.RECEIVABLE,
-        undefined,
+        TransactionStatus.PENDING,
         undefined,
         undefined,
         undefined,
         1,
-        100
+        1000
+      ),
+      payable: this.transactionService.getTransactions(
+        TransactionKind.PAYABLE,
+        TransactionStatus.PENDING,
+        undefined,
+        undefined,
+        undefined,
+        1,
+        1000
+      ),
+      allPending: this.transactionService.getTransactions(
+        undefined,
+        TransactionStatus.PENDING,
+        undefined,
+        undefined,
+        undefined,
+        1,
+        1000
       )
-      .subscribe({
-        next: (response) => {
-          this.stats.totalReceivable = response.data
-            .filter((t) => t.status === TransactionStatus.PENDING)
-            .reduce((sum, t) => sum + t.amount, 0);
+    }).subscribe({
+      next: (results) => {
+        // Calcular total a receber - somar todos os amounts
+        this.stats.totalReceivable = results.receivable.data.reduce(
+          (sum, transaction) => sum + parseFloat(transaction.amount.toString()),
+          0
+        );
 
-        },
-      });
+        // Calcular total a pagar - somar todos os amounts
+        this.stats.totalPayable = results.payable.data.reduce(
+          (sum, transaction) => sum + parseFloat(transaction.amount.toString()),
+          0
+        );
 
-    // Carregar a pagar
-    this.transactionService
-      .getTransactions(TransactionKind.PAYABLE, undefined, undefined, undefined, undefined, 1, 100)
-      .subscribe({
-        next: (response) => {
-          this.stats.totalPayable = response.data
-            .filter((t) => t.status === TransactionStatus.PENDING)
-            .reduce((sum, t) => sum + t.amount, 0);
+        // Calcular total em atraso
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-          this.isLoading = false;
-        },
-      });
+        this.stats.totalOverdue = results.allPending.data
+          .filter(transaction => {
+            const dueDate = new Date(transaction.dueDate);
+            dueDate.setHours(0, 0, 0, 0);
+            return dueDate < today;
+          })
+          .reduce((sum, transaction) => sum + parseFloat(transaction.amount.toString()), 0);
+
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Erro ao carregar dados do dashboard:', error);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  navigateToTransactions(kind?: TransactionKind, status?: TransactionStatus): void {
+    this.router.navigate(['/transactions'], {
+      queryParams: {
+        kind: kind || '',
+        status: status || ''
+      }
+    });
+  }
+
+  navigateToReports(): void {
+    this.router.navigate(['/reports']);
   }
 }

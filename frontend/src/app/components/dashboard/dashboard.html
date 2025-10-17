@@ -1,117 +1,141 @@
-<div class="flex h-screen bg-gray-100">
+<div class="flex min-h-screen bg-gray-100">
   <app-sidebar></app-sidebar>
 
-  <div class="flex-1 flex flex-col ml-64">
+  <div class="flex-1 ml-64">
+    <div class="p-8">
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
+        <p class="text-gray-600 mt-2">Visão geral das suas transações financeiras</p>
+      </div>
 
-    <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
-      <div class="container mx-auto px-6 py-8">
-        <h1 class="text-3xl font-semibold text-gray-800 mb-6">Dashboard</h1>
+      <!-- Loading -->
+      <div *ngIf="isLoading" class="text-center py-12">
+        <i class="fas fa-spinner fa-spin text-4xl text-blue-600 mb-2"></i>
+        <p class="text-gray-600 text-lg">Carregando dados...</p>
+      </div>
 
-        <div *ngIf="isLoading" class="flex justify-center items-center h-64">
-          <svg class="animate-spin h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-        </div>
-
-        <div *ngIf="!isLoading" class="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
-          <!-- Card: Total a Receber -->
-          <div class="flex items-center p-4 bg-white rounded-lg shadow-md">
-            <div class="p-3 mr-4 text-green-500 bg-green-100 rounded-full">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </div>
+      <!-- Cards de Estatísticas -->
+      <div *ngIf="!isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Card: Total a Receber -->
+        <div
+          (click)="navigateToTransactions(TransactionKind.RECEIVABLE, TransactionStatus.PENDING)"
+          class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200 cursor-pointer border-l-4 border-green-500"
+        >
+          <div class="flex items-center justify-between">
             <div>
-              <p class="mb-2 text-sm font-medium text-gray-600">A Receber</p>
-              <p class="text-lg font-semibold text-gray-700">
-                {{ stats.totalReceivable | currency:'BRL' }}
+              <p class="text-sm font-medium text-gray-600 uppercase">A Receber</p>
+              <p class="text-3xl font-bold text-green-600 mt-2">
+                {{ stats.totalReceivable | currency : 'BRL' }}
+              </p>
+              <p class="text-xs text-gray-500 mt-2">
+                {{ stats.totalReceivable > 0 ? 'Pendentes' : 'Nenhum pendente' }}
               </p>
             </div>
-          </div>
-
-          <!-- Card: Total a Pagar -->
-          <div class="flex items-center p-4 bg-white rounded-lg shadow-md">
-            <div class="p-3 mr-4 text-red-500 bg-red-100 rounded-full">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-              </svg>
-            </div>
-            <div>
-              <p class="mb-2 text-sm font-medium text-gray-600">A Pagar</p>
-              <p class="text-lg font-semibold text-gray-700">
-                {{ stats.totalPayable | currency:'BRL' }}
-              </p>
-            </div>
-          </div>
-
-          <!-- Card: Atrasadas a Receber -->
-          <div class="flex items-center p-4 bg-white rounded-lg shadow-md">
-            <div class="p-3 mr-4 text-orange-500 bg-orange-100 rounded-full">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-              </svg>
-            </div>
-            <div>
-              <p class="mb-2 text-sm font-medium text-gray-600">Atrasadas (Receber)</p>
-              <p class="text-lg font-semibold text-gray-700">
-                {{ stats.overdueReceivable | currency:'BRL' }}
-              </p>
-            </div>
-          </div>
-
-          <!-- Card: Atrasadas a Pagar -->
-          <div class="flex items-center p-4 bg-white rounded-lg shadow-md">
-            <div class="p-3 mr-4 text-purple-500 bg-purple-100 rounded-full">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </div>
-            <div>
-              <p class="mb-2 text-sm font-medium text-gray-600">Atrasadas (Pagar)</p>
-              <p class="text-lg font-semibold text-gray-700">
-                {{ stats.overduePayable | currency:'BRL' }}
-              </p>
+            <div class="bg-green-100 rounded-full p-4">
+              <i class="fas fa-arrow-down text-2xl text-green-600"></i>
             </div>
           </div>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h2 class="text-xl font-semibold text-gray-800 mb-4">Ações Rápidas</h2>
-          <div class="grid gap-4 md:grid-cols-3">
-            <a routerLink="/clients" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-              <svg class="w-8 h-8 text-blue-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-              </svg>
-              <div>
-                <p class="font-semibold text-gray-800">Gerenciar Clientes</p>
-                <p class="text-sm text-gray-600">Adicionar ou editar clientes</p>
-              </div>
-            </a>
+        <!-- Card: Total a Pagar -->
+        <div
+          (click)="navigateToTransactions(TransactionKind.PAYABLE, TransactionStatus.PENDING)"
+          class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200 cursor-pointer border-l-4 border-red-500"
+        >
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-600 uppercase">A Pagar</p>
+              <p class="text-3xl font-bold text-red-600 mt-2">
+                {{ stats.totalPayable | currency : 'BRL' }}
+              </p>
+              <p class="text-xs text-gray-500 mt-2">
+                {{ stats.totalPayable > 0 ? 'Pendentes' : 'Nenhum pendente' }}
+              </p>
+            </div>
+            <div class="bg-red-100 rounded-full p-4">
+              <i class="fas fa-arrow-up text-2xl text-red-600"></i>
+            </div>
+          </div>
+        </div>
 
-            <a routerLink="/transactions" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-              <svg class="w-8 h-8 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-              </svg>
-              <div>
-                <p class="font-semibold text-gray-800">Transações</p>
-                <p class="text-sm text-gray-600">Ver contas a pagar/receber</p>
-              </div>
-            </a>
-
-            <a routerLink="/reports" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-              <svg class="w-8 h-8 text-purple-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-              </svg>
-              <div>
-                <p class="font-semibold text-gray-800">Relatórios</p>
-                <p class="text-sm text-gray-600">Fluxo de caixa e análises</p>
-              </div>
-            </a>
+        <!-- Card: Em Atraso -->
+        <div
+          (click)="navigateToTransactions(undefined, TransactionStatus.PENDING)"
+          class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200 cursor-pointer border-l-4 border-yellow-500"
+        >
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-600 uppercase">Em Atraso</p>
+              <p class="text-3xl font-bold text-yellow-600 mt-2">
+                {{ stats.totalOverdue | currency : 'BRL' }}
+              </p>
+              <p class="text-xs text-gray-500 mt-2">
+                {{ stats.totalOverdue > 0 ? 'Requer atenção' : 'Tudo em dia' }}
+              </p>
+            </div>
+            <div class="bg-yellow-100 rounded-full p-4">
+              <i class="fas fa-exclamation-triangle text-2xl text-yellow-600"></i>
+            </div>
           </div>
         </div>
       </div>
-    </main>
+
+      <!-- Ações Rápidas -->
+      <div *ngIf="!isLoading" class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Ações Rápidas</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <button
+            (click)="navigateToTransactions()"
+            class="flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors duration-200"
+          >
+            <i class="fas fa-exchange-alt text-blue-600 text-xl"></i>
+            <span class="text-gray-700 font-medium">Ver Transações</span>
+          </button>
+
+          <button
+            (click)="navigateToReports()"
+            class="flex items-center gap-3 p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors duration-200"
+          >
+            <i class="fas fa-chart-bar text-purple-600 text-xl"></i>
+            <span class="text-gray-700 font-medium">Relatórios</span>
+          </button>
+
+          <button
+            (click)="navigateToTransactions(TransactionKind.RECEIVABLE, TransactionStatus.PENDING)"
+            class="flex items-center gap-3 p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors duration-200"
+          >
+            <i class="fas fa-plus-circle text-green-600 text-xl"></i>
+            <span class="text-gray-700 font-medium">Nova Transação</span>
+          </button>
+
+          <button
+            (click)="navigateToTransactions(undefined, TransactionStatus.PENDING)"
+            class="flex items-center gap-3 p-4 bg-yellow-50 hover:bg-yellow-100 rounded-lg transition-colors duration-200"
+          >
+            <i class="fas fa-clock text-yellow-600 text-xl"></i>
+            <span class="text-gray-700 font-medium">Pendentes</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Resumo -->
+      <div *ngIf="!isLoading" class="mt-8 bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Resumo Financeiro</h2>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+            <span class="text-gray-700">Saldo Projetado (A Receber - A Pagar)</span>
+            <span
+              [ngClass]="{
+                'text-green-600': stats.totalReceivable - stats.totalPayable >= 0,
+                'text-red-600': stats.totalReceivable - stats.totalPayable < 0
+              }"
+              class="font-bold text-lg"
+            >
+              {{ stats.totalReceivable - stats.totalPayable | currency : 'BRL' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
