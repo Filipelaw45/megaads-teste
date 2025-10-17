@@ -18,11 +18,12 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('ERP financeiro')
-    .setDescription('mini‐ERP financeiro')
+    .setTitle('ERP Financeiro')
+    .setDescription('API do mini-ERP financeiro para gerenciamento de clientes, transações e relatórios')
     .setVersion('1.0')
-    .addTag('erp')
+    .addBearerAuth()
     .build();
+
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
 
