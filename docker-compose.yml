@@ -12,6 +12,11 @@ services:
       - cluster
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d ${DB_NAME}']
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   api:
     build:
@@ -29,6 +34,10 @@ services:
       - '${API_PORT}:${API_PORT}'
     networks:
       - cluster
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "npm run migration:run && npm run seed && npm run start:prod"
 
 volumes:
   postgres_data:
