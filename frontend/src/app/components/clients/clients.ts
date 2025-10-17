@@ -43,12 +43,10 @@ export class ClientsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log('ClientsComponent initialized');
     this.loadClients();
   }
 
   loadClients(): void {
-    console.log('Loading clients...');
     this.isLoading = true;
     this.errorMessage = '';
 
@@ -65,7 +63,6 @@ export class ClientsComponent implements OnInit {
 
     this.clientService.getClients(queryParams).subscribe({
       next: (response) => {
-        console.log('Clients loaded:', response);
         this.clients = response.data;
         this.totalItems = response.total;
         this.totalPages = response.totalPages;
