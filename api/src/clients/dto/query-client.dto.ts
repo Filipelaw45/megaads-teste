@@ -1,5 +1,11 @@
 import { Type } from 'class-transformer';
-import { IsOptional, IsString, IsEmail, IsInt, Min, Max } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsInt,
+  Min,
+  Max,
+} from 'class-validator';
 
 export class QueryClientDto {
   @IsOptional()
@@ -11,7 +17,7 @@ export class QueryClientDto {
   lastName?: string;
 
   @IsOptional()
-  @IsEmail()
+  @IsString()
   email?: string;
 
   @IsOptional()

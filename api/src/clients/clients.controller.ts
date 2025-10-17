@@ -30,6 +30,7 @@ import {
   UnauthorizedErrorResponseDto,
   ErrorNotFoundResponseDto,
 } from '../shared/error-response.dto';
+import { Roles } from 'src/decorators/roles.decorator';
 
 @ApiTags('Clients')
 @UseGuards(JwtAuthGuard)
@@ -60,6 +61,7 @@ export class ClientsController {
     description: 'Cliente já existe',
     type: ConflictErrorResponseDto,
   })
+  @Roles('ADMIN')
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createClientDto: CreateClientDto): Promise<ClientDto> {
     return this.clientsService.create(createClientDto);
@@ -177,6 +179,7 @@ export class ClientsController {
   }
 
   @Delete(':id')
+  @Roles('ADMIN')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Excluir um cliente por ID' })
   @ApiResponse({
