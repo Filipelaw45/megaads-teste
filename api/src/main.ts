@@ -6,6 +6,13 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors({
+    origin: 'http://localhost:4200',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -18,11 +25,14 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('ERP financeiro')
-    .setDescription('mini‐ERP financeiro')
+    .setTitle('ERP Financeiro')
+    .setDescription(
+      'API do mini-ERP financeiro para gerenciamento de clientes, transações e relatórios',
+    )
     .setVersion('1.0')
-    .addTag('erp')
+    .addBearerAuth()
     .build();
+
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
 

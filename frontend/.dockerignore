@@ -1,0 +1,14 @@
+node_modules
+npm-debug.log
+dist
+.angular
+coverage
+.env
+.env.local
+.git
+.vscode
+.idea
+*.md
+e2e
+*.spec.ts
+karma.conf.js

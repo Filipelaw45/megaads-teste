@@ -1,0 +1,318 @@
+<div class="flex min-h-screen bg-gray-100">
+  <app-sidebar></app-sidebar>
+
+  <div class="flex-1 ml-64">
+    <div class="p-8 mt-16">
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">Clientes</h1>
+        <button
+          (click)="openCreateModal()"
+          class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium"
+        >
+          <i class="fas fa-plus"></i>
+          Novo Cliente
+        </button>
+      </div>
+
+      <!-- Mensagem de erro global -->
+      <div
+        *ngIf="errorMessage && !showModal"
+        class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6"
+      >
+        {{ errorMessage }}
+      </div>
+
+      <!-- Barra de busca com filtros -->
+      <div class="mb-6">
+        <div class="flex gap-3">
+          <!-- Select do filtro -->
+          <select
+            [(ngModel)]="searchFilter"
+            (change)="onFilterChange()"
+            class="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-black"
+          >
+            <option value="firstName">Nome</option>
+            <option value="lastName">Sobrenome</option>
+            <option value="email">Email</option>
+            <option value="cpfCnpj">CPF/CNPJ</option>
+          </select>
+
+          <!-- Input de busca -->
+          <div class="relative flex-1">
+            <input
+              type="text"
+              [placeholder]="
+                searchFilter === 'firstName'
+                  ? 'Buscar por nome...'
+                  : searchFilter === 'lastName'
+                  ? 'Buscar por sobrenome...'
+                  : searchFilter === 'email'
+                  ? 'Buscar por email...'
+                  : 'Buscar por CPF/CNPJ...'
+              "
+              [(ngModel)]="searchTerm"
+              (input)="onSearch($event)"
+              class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <i
+              class="fas fa-search absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+            ></i>
+          </div>
+
+          <!-- Botão limpar -->
+          <button
+            *ngIf="searchTerm"
+            (click)="clearSearch()"
+            class="px-4 py-3 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-gray-700 transition-colors duration-200"
+            title="Limpar busca"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <!-- Indicador de busca ativa -->
+        <div *ngIf="searchTerm" class="mt-2 text-sm text-gray-600">
+          <i class="fas fa-filter mr-1"></i>
+          Buscando por
+          <span class="font-semibold">
+            {{
+              searchFilter === 'firstName'
+                ? 'nome'
+                : searchFilter === 'lastName'
+                ? 'sobrenome'
+                : searchFilter === 'email'
+                ? 'email'
+                : 'CPF/CNPJ'
+            }} </span
+          >:
+          <span class="font-semibold text-blue-600">"{{ searchTerm }}"</span>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="isLoading" class="text-center py-12">
+        <i class="fas fa-spinner fa-spin text-4xl text-blue-600 mb-2"></i>
+        <p class="text-gray-600 text-lg">Carregando...</p>
+      </div>
+
+      <!-- Tabela de clientes -->
+      <div *ngIf="!isLoading" class="bg-white rounded-lg shadow-md overflow-hidden">
+        <table *ngIf="clients.length > 0" class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">
+                Nome
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">
+                Email
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">
+                CPF/CNPJ
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">
+                Data de Cadastro
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">
+                Ações
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr
+              *ngFor="let client of clients"
+              class="hover:bg-gray-50 transition-colors duration-150"
+            >
+              <td class="px-6 py-4 text-sm text-gray-900">
+                {{ client.firstName }} {{ client.lastName }}
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-600">{{ client.email }}</td>
+              <td class="px-6 py-4 text-sm text-gray-600">{{ client.cpfCnpj }}</td>
+              <td class="px-6 py-4 text-sm text-gray-600">
+                {{ client.createdAt | date : 'dd/MM/yyyy HH:mm' }}
+              </td>
+              <td class="px-6 py-4 text-sm">
+                <div class="flex gap-2">
+                  <button
+                    (click)="openEditModal(client)"
+                    class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-150"
+                    title="Editar"
+                  >
+                    <i class="fas fa-edit cursor-pointer">Editar</i>
+                  </button>
+                  <button
+                    (click)="deleteClient(client.id)"
+                    class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150"
+                    title="Excluir"
+                  >
+                    <i class="fas fa-trash pointer cursor-pointer">Excluir</i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div *ngIf="clients.length === 0" class="text-center py-12">
+          <i class="fas fa-users text-6xl text-gray-300 mb-4"></i>
+          <p class="text-gray-500 text-lg">Nenhum cliente encontrado</p>
+          <button
+            *ngIf="searchTerm"
+            (click)="clearSearch()"
+            class="mt-4 text-blue-600 hover:text-blue-700 font-medium"
+          >
+            Limpar busca
+          </button>
+        </div>
+      </div>
+
+      <!-- Paginação -->
+      <div
+        *ngIf="!isLoading && totalPages > 1"
+        class="flex items-center justify-center gap-2 mt-8 flex-wrap"
+      >
+        <button
+          [disabled]="currentPage === 1"
+          (click)="previousPage()"
+          class="px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-700"
+        >
+          <i class="fas fa-chevron-left">Anterior</i>
+        </button>
+
+        <button
+          *ngFor="let page of pageNumbers"
+          (click)="goToPage(page)"
+          [ngClass]="{
+            'bg-blue-600 text-white border-blue-600': page === currentPage,
+            'bg-white hover:bg-blue-600 hover:text-white hover:border-blue-600':
+              page !== currentPage
+          }"
+          class="px-4 py-2 border border-gray-300 rounded-lg transition-colors duration-200"
+        >
+          {{ page }}
+        </button>
+
+        <button
+          [disabled]="currentPage === totalPages"
+          (click)="nextPage()"
+          class="px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-700"
+        >
+          <i class="fas fa-chevron-right">Proximo</i>
+        </button>
+
+        <span class="ml-4 text-gray-600 text-sm">
+          Página {{ currentPage }} de {{ totalPages }} ({{ totalItems }} itens)
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div
+    *ngIf="showModal"
+    (click)="closeModal()"
+    class="fixed inset-0 bg-gray-800 bg-opacity-90 flex items-center justify-center z-50 p-4"
+  >
+    <div
+      (click)="$event.stopPropagation()"
+      class="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+    >
+      <div class="flex justify-between items-center p-6 border-b border-gray-200">
+        <h2 class="text-2xl font-bold text-gray-800">
+          {{ isEditMode ? 'Editar Cliente' : 'Novo Cliente' }}
+        </h2>
+        <button
+          (click)="closeModal()"
+          class="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-150"
+        >
+          <i class="fas fa-times text-gray-500 text-xl"></i>
+        </button>
+      </div>
+
+      <div
+        *ngIf="errorMessage"
+        class="mx-6 mt-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg"
+      >
+        {{ errorMessage }}
+      </div>
+
+      <form [formGroup]="clientForm" (ngSubmit)="onSubmit()" class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Nome *</label>
+            <input
+              type="text"
+              formControlName="firstName"
+              placeholder="Digite o primeiro nome"
+              [class.border-red-500]="hasFieldError('firstName')"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <span *ngIf="hasFieldError('firstName')" class="text-red-600 text-sm mt-1 block">
+              {{ getFieldError('firstName') }}
+            </span>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Sobrenome *</label>
+            <input
+              type="text"
+              formControlName="lastName"
+              placeholder="Digite o sobrenome"
+              [class.border-red-500]="hasFieldError('lastName')"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <span *ngIf="hasFieldError('lastName')" class="text-red-600 text-sm mt-1 block">
+              {{ getFieldError('lastName') }}
+            </span>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="Digite o email"
+            [class.border-red-500]="hasFieldError('email')"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <span *ngIf="hasFieldError('email')" class="text-red-600 text-sm mt-1 block">
+            {{ getFieldError('email') }}
+          </span>
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">CPF/CNPJ *</label>
+          <input
+            type="text"
+            formControlName="cpfCnpj"
+            placeholder="Digite o CPF ou CNPJ (somente números)"
+            maxlength="14"
+            [class.border-red-500]="hasFieldError('cpfCnpj')"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <span *ngIf="hasFieldError('cpfCnpj')" class="text-red-600 text-sm mt-1 block">
+            {{ getFieldError('cpfCnpj') }}
+          </span>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
+          <button
+            type="button"
+            (click)="closeModal()"
+            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="isLoading"
+            class="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            {{ isLoading ? 'Salvando...' : isEditMode ? 'Atualizar' : 'Cadastrar' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

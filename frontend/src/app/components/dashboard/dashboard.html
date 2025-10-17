@@ -1,0 +1,141 @@
+<div class="flex min-h-screen bg-gray-100">
+  <app-sidebar></app-sidebar>
+
+  <div class="flex-1 ml-64">
+    <div class="p-8">
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
+        <p class="text-gray-600 mt-2">Visão geral das suas transações financeiras</p>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="isLoading" class="text-center py-12">
+        <i class="fas fa-spinner fa-spin text-4xl text-blue-600 mb-2"></i>
+        <p class="text-gray-600 text-lg">Carregando dados...</p>
+      </div>
+
+      <!-- Cards de Estatísticas -->
+      <div *ngIf="!isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Card: Total a Receber -->
+        <div
+          (click)="navigateToTransactions(TransactionKind.RECEIVABLE, TransactionStatus.PENDING)"
+          class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200 cursor-pointer border-l-4 border-green-500"
+        >
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-600 uppercase">A Receber</p>
+              <p class="text-3xl font-bold text-green-600 mt-2">
+                {{ stats.totalReceivable | currency : 'BRL' }}
+              </p>
+              <p class="text-xs text-gray-500 mt-2">
+                {{ stats.totalReceivable > 0 ? 'Pendentes' : 'Nenhum pendente' }}
+              </p>
+            </div>
+            <div class="bg-green-100 rounded-full p-4">
+              <i class="fas fa-arrow-down text-2xl text-green-600"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card: Total a Pagar -->
+        <div
+          (click)="navigateToTransactions(TransactionKind.PAYABLE, TransactionStatus.PENDING)"
+          class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200 cursor-pointer border-l-4 border-red-500"
+        >
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-600 uppercase">A Pagar</p>
+              <p class="text-3xl font-bold text-red-600 mt-2">
+                {{ stats.totalPayable | currency : 'BRL' }}
+              </p>
+              <p class="text-xs text-gray-500 mt-2">
+                {{ stats.totalPayable > 0 ? 'Pendentes' : 'Nenhum pendente' }}
+              </p>
+            </div>
+            <div class="bg-red-100 rounded-full p-4">
+              <i class="fas fa-arrow-up text-2xl text-red-600"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card: Em Atraso -->
+        <div
+          (click)="navigateToTransactions(undefined, TransactionStatus.PENDING)"
+          class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200 cursor-pointer border-l-4 border-yellow-500"
+        >
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-600 uppercase">Em Atraso</p>
+              <p class="text-3xl font-bold text-yellow-600 mt-2">
+                {{ stats.totalOverdue | currency : 'BRL' }}
+              </p>
+              <p class="text-xs text-gray-500 mt-2">
+                {{ stats.totalOverdue > 0 ? 'Requer atenção' : 'Tudo em dia' }}
+              </p>
+            </div>
+            <div class="bg-yellow-100 rounded-full p-4">
+              <i class="fas fa-exclamation-triangle text-2xl text-yellow-600"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ações Rápidas -->
+      <div *ngIf="!isLoading" class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Ações Rápidas</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <button
+            (click)="navigateToTransactions()"
+            class="flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors duration-200"
+          >
+            <i class="fas fa-exchange-alt text-blue-600 text-xl"></i>
+            <span class="text-gray-700 font-medium">Ver Transações</span>
+          </button>
+
+          <button
+            (click)="navigateToReports()"
+            class="flex items-center gap-3 p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors duration-200"
+          >
+            <i class="fas fa-chart-bar text-purple-600 text-xl"></i>
+            <span class="text-gray-700 font-medium">Relatórios</span>
+          </button>
+
+          <button
+            (click)="navigateToTransactions(TransactionKind.RECEIVABLE, TransactionStatus.PENDING)"
+            class="flex items-center gap-3 p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors duration-200"
+          >
+            <i class="fas fa-plus-circle text-green-600 text-xl"></i>
+            <span class="text-gray-700 font-medium">Nova Transação</span>
+          </button>
+
+          <button
+            (click)="navigateToTransactions(undefined, TransactionStatus.PENDING)"
+            class="flex items-center gap-3 p-4 bg-yellow-50 hover:bg-yellow-100 rounded-lg transition-colors duration-200"
+          >
+            <i class="fas fa-clock text-yellow-600 text-xl"></i>
+            <span class="text-gray-700 font-medium">Pendentes</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Resumo -->
+      <div *ngIf="!isLoading" class="mt-8 bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Resumo Financeiro</h2>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+            <span class="text-gray-700">Saldo Projetado (A Receber - A Pagar)</span>
+            <span
+              [ngClass]="{
+                'text-green-600': stats.totalReceivable - stats.totalPayable >= 0,
+                'text-red-600': stats.totalReceivable - stats.totalPayable < 0
+              }"
+              class="font-bold text-lg"
+            >
+              {{ stats.totalReceivable - stats.totalPayable | currency : 'BRL' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
