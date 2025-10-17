@@ -82,6 +82,6 @@ export class QueryTransactionDto {
   @Type(() => Number)
   @IsInt({ message: 'O limit deve ser um número inteiro' })
   @Min(1, { message: 'O limit deve ser no mínimo 1' })
-  @Max(100, { message: 'O limit deve ser no máximo 100' })
-  limit?: number = 10;
+  @Max(1000, { message: 'O limit deve ser no máximo 1000' })
+  limit?: number = 100;
 }
