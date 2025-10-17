@@ -21,7 +21,7 @@ import {
   ErrorResponseDto,
   UnauthorizedErrorResponseDto,
 } from 'src/shared/error-response.dto';
-import { ApiBody } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -70,8 +70,9 @@ export class AuthController {
   }
 
   @Post('register')
-  // @UseGuards(JwtAuthGuard)
-  // @Roles('ADMIN')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Roles('ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar um novo usuário' })
   @ApiBody({
