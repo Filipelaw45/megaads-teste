@@ -1,0 +1,117 @@
+<div class="flex h-screen bg-gray-100">
+  <app-sidebar></app-sidebar>
+
+  <div class="flex-1 flex flex-col ml-64">
+
+    <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
+      <div class="container mx-auto px-6 py-8">
+        <h1 class="text-3xl font-semibold text-gray-800 mb-6">Dashboard</h1>
+
+        <div *ngIf="isLoading" class="flex justify-center items-center h-64">
+          <svg class="animate-spin h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
+
+        <div *ngIf="!isLoading" class="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
+          <!-- Card: Total a Receber -->
+          <div class="flex items-center p-4 bg-white rounded-lg shadow-md">
+            <div class="p-3 mr-4 text-green-500 bg-green-100 rounded-full">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div>
+              <p class="mb-2 text-sm font-medium text-gray-600">A Receber</p>
+              <p class="text-lg font-semibold text-gray-700">
+                {{ stats.totalReceivable | currency:'BRL' }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Card: Total a Pagar -->
+          <div class="flex items-center p-4 bg-white rounded-lg shadow-md">
+            <div class="p-3 mr-4 text-red-500 bg-red-100 rounded-full">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+              </svg>
+            </div>
+            <div>
+              <p class="mb-2 text-sm font-medium text-gray-600">A Pagar</p>
+              <p class="text-lg font-semibold text-gray-700">
+                {{ stats.totalPayable | currency:'BRL' }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Card: Atrasadas a Receber -->
+          <div class="flex items-center p-4 bg-white rounded-lg shadow-md">
+            <div class="p-3 mr-4 text-orange-500 bg-orange-100 rounded-full">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+              </svg>
+            </div>
+            <div>
+              <p class="mb-2 text-sm font-medium text-gray-600">Atrasadas (Receber)</p>
+              <p class="text-lg font-semibold text-gray-700">
+                {{ stats.overdueReceivable | currency:'BRL' }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Card: Atrasadas a Pagar -->
+          <div class="flex items-center p-4 bg-white rounded-lg shadow-md">
+            <div class="p-3 mr-4 text-purple-500 bg-purple-100 rounded-full">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div>
+              <p class="mb-2 text-sm font-medium text-gray-600">Atrasadas (Pagar)</p>
+              <p class="text-lg font-semibold text-gray-700">
+                {{ stats.overduePayable | currency:'BRL' }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">Ações Rápidas</h2>
+          <div class="grid gap-4 md:grid-cols-3">
+            <a routerLink="/clients" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+              <svg class="w-8 h-8 text-blue-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+              </svg>
+              <div>
+                <p class="font-semibold text-gray-800">Gerenciar Clientes</p>
+                <p class="text-sm text-gray-600">Adicionar ou editar clientes</p>
+              </div>
+            </a>
+
+            <a routerLink="/transactions" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+              <svg class="w-8 h-8 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+              </svg>
+              <div>
+                <p class="font-semibold text-gray-800">Transações</p>
+                <p class="text-sm text-gray-600">Ver contas a pagar/receber</p>
+              </div>
+            </a>
+
+            <a routerLink="/reports" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+              <svg class="w-8 h-8 text-purple-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
+              <div>
+                <p class="font-semibold text-gray-800">Relatórios</p>
+                <p class="text-sm text-gray-600">Fluxo de caixa e análises</p>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

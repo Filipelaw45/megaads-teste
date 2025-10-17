@@ -1,0 +1,370 @@
+<div class="flex min-h-screen bg-gray-100">
+  <app-sidebar></app-sidebar>
+
+  <div class="flex-1 ml-64">
+    <div class="p-8">
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">Transações</h1>
+        <button
+          (click)="openCreateModal()"
+          class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium"
+        >
+          <i class="fas fa-plus"></i>
+          Nova Transação
+        </button>
+      </div>
+
+      <!-- Filtros -->
+      <div class="mb-6 bg-white p-4 rounded-lg shadow-md">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
+            <select
+              [(ngModel)]="filterKind"
+              (change)="onFilterChange()"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            >
+              <option value="">Todos</option>
+              <option [value]="TransactionKind.RECEIVABLE">A Receber</option>
+              <option [value]="TransactionKind.PAYABLE">A Pagar</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+            <select
+              [(ngModel)]="filterStatus"
+              (change)="onFilterChange()"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            >
+              <option value="">Todos</option>
+              <option [value]="TransactionStatus.PENDING">Pendente</option>
+              <option [value]="TransactionStatus.PAID">Pago</option>
+              <option [value]="TransactionStatus.CANCELLED">Cancelado</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Cliente</label>
+            <select
+              [(ngModel)]="filterClientId"
+              (change)="onFilterChange()"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            >
+              <option value="">Todos</option>
+              <option *ngFor="let client of clients" [value]="client.id">
+                {{ client.firstName }} {{ client.lastName }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Indicador de filtros ativos -->
+        <div
+          *ngIf="filterKind || filterStatus || filterClientId"
+          class="mt-4 flex items-center gap-2 flex-wrap"
+        >
+          <span class="text-sm text-gray-600">
+            <i class="fas fa-filter mr-1"></i>
+            Filtros ativos:
+          </span>
+          <span *ngIf="filterKind" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+            {{ filterKind === TransactionKind.RECEIVABLE ? 'A Receber' : 'A Pagar' }}
+          </span>
+          <span
+            *ngIf="filterStatus"
+            class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm"
+          >
+            {{
+              filterStatus === TransactionStatus.PENDING
+                ? 'Pendente'
+                : filterStatus === TransactionStatus.PAID
+                ? 'Pago'
+                : 'Cancelado'
+            }}
+          </span>
+          <span
+            *ngIf="filterClientId"
+            class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm"
+          >
+            Cliente selecionado
+          </span>
+          <button
+            (click)="clearFilters()"
+            class="ml-2 text-sm text-red-600 hover:text-red-700 font-medium"
+          >
+            Limpar filtros
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="isLoading" class="text-center py-12">
+        <i class="fas fa-spinner fa-spin text-4xl text-blue-600 mb-2"></i>
+        <p class="text-gray-600 text-lg">Carregando...</p>
+      </div>
+
+      <!-- Tabela de transações -->
+      <div *ngIf="!isLoading" class="bg-white rounded-lg shadow-md overflow-x-auto">
+        <table *ngIf="transactions.length > 0" class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">
+                Descrição
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">
+                Cliente
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">
+                Tipo
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">
+                Valor
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">
+                Vencimento
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">
+                Status
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">
+                Ações
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr
+              *ngFor="let transaction of transactions"
+              class="hover:bg-gray-50 transition-colors duration-150"
+            >
+              <td class="px-6 py-4 text-sm text-gray-900">{{ transaction.description }}</td>
+              <td class="px-6 py-4 text-sm text-gray-600">
+                {{ transaction.client.firstName + ' ' + transaction.client.lastName }}
+              </td>
+              <td class="px-6 py-4 text-sm">
+                <span
+                  [ngClass]="{
+                    'bg-green-100 text-green-800': transaction.kind === TransactionKind.RECEIVABLE,
+                    'bg-red-100 text-red-800': transaction.kind === TransactionKind.PAYABLE
+                  }"
+                  class="px-3 py-1 rounded-full text-xs font-medium"
+                >
+                  {{ transaction.kind === TransactionKind.RECEIVABLE ? 'A Receber' : 'A Pagar' }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-900 font-medium">
+                {{ transaction.amount | currency : 'BRL' }}
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-600">
+                {{ transaction.dueDate | date : 'dd/MM/yyyy' }}
+              </td>
+              <td class="px-6 py-4 text-sm">
+                <span
+                  [ngClass]="{
+                    'bg-yellow-100 text-yellow-800':
+                      transaction.status === TransactionStatus.PENDING,
+                    'bg-green-100 text-green-800': transaction.status === TransactionStatus.PAID,
+                    'bg-gray-100 text-gray-800': transaction.status === TransactionStatus.CANCELLED
+                  }"
+                  class="px-3 py-1 rounded-full text-xs font-medium"
+                >
+                  {{
+                    transaction.status === TransactionStatus.PENDING
+                      ? 'Pendente'
+                      : transaction.status === TransactionStatus.PAID
+                      ? 'Pago'
+                      : 'Cancelado'
+                  }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-sm">
+                <div class="flex gap-2">
+                  <button
+                    (click)="openEditModal(transaction)"
+                    class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-150"
+                    title="Editar"
+                  >
+                    <i class="fas fa-edit cursor-pointer">Editar</i>
+                  </button>
+                  <button
+                    (click)="deleteTransaction(transaction.id)"
+                    class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150"
+                    title="Excluir"
+                  >
+                    <i class="fas fa-trash cursor-pointer">Excluir</i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div *ngIf="transactions.length === 0" class="text-center py-12">
+          <i class="fas fa-exchange-alt text-6xl text-gray-300 mb-4"></i>
+          <p class="text-gray-500 text-lg">Nenhuma transação encontrada</p>
+          <button
+            *ngIf="filterKind || filterStatus || filterClientId"
+            (click)="clearFilters()"
+            class="mt-4 text-blue-600 hover:text-blue-700 font-medium"
+          >
+            Limpar filtros
+          </button>
+        </div>
+      </div>
+
+      <!-- Paginação -->
+      <div
+        *ngIf="!isLoading && totalPages > 1"
+        class="flex items-center justify-center gap-2 mt-8 flex-wrap"
+      >
+        <button
+          [disabled]="currentPage === 1"
+          (click)="previousPage()"
+          class="px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-700"
+        >
+          <i class="fas fa-chevron-left">Anterior</i>
+        </button>
+
+        <button
+          *ngFor="let page of pageNumbers"
+          (click)="goToPage(page)"
+          [ngClass]="{
+            'bg-blue-600 text-white border-blue-600': page === currentPage,
+            'bg-white hover:bg-blue-600 hover:text-white hover:border-blue-600':
+              page !== currentPage
+          }"
+          class="px-4 py-2 border border-gray-300 rounded-lg transition-colors duration-200"
+        >
+          {{ page }}
+        </button>
+
+        <button
+          [disabled]="currentPage === totalPages"
+          (click)="nextPage()"
+          class="px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-700"
+        >
+          <i class="fas fa-chevron-right">Proximo</i>
+        </button>
+
+        <span class="ml-4 text-gray-600 text-sm">
+          Página {{ currentPage }} de {{ totalPages }} ({{ totalItems }} itens)
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div
+    *ngIf="showModal"
+    (click)="closeModal()"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+  >
+    <div
+      (click)="$event.stopPropagation()"
+      class="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+    >
+      <div class="flex justify-between items-center p-6 border-b border-gray-200">
+        <h2 class="text-2xl font-bold text-gray-800">
+          {{ isEditMode ? 'Editar Transação' : 'Nova Transação' }}
+        </h2>
+        <button
+          (click)="closeModal()"
+          class="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-150"
+        >
+          <i class="fas fa-times text-gray-500 text-xl"></i>
+        </button>
+      </div>
+
+      <form [formGroup]="transactionForm" (ngSubmit)="onSubmit()" class="p-6">
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Descrição *</label>
+          <input
+            type="text"
+            formControlName="description"
+            placeholder="Digite a descrição"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo *</label>
+            <select
+              formControlName="kind"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option [value]="TransactionKind.RECEIVABLE">A Receber</option>
+              <option [value]="TransactionKind.PAYABLE">A Pagar</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Status *</label>
+            <select
+              formControlName="status"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option [value]="TransactionStatus.PENDING">Pendente</option>
+              <option [value]="TransactionStatus.PAID">Pago</option>
+              <option [value]="TransactionStatus.CANCELLED">Cancelado</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Valor *</label>
+            <input
+              type="number"
+              formControlName="amount"
+              placeholder="0.00"
+              step="0.01"
+              min="0"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Data de Vencimento *</label>
+            <input
+              type="date"
+              formControlName="dueDate"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Cliente</label>
+          <select
+            formControlName="clientId"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Selecione um cliente (opcional)</option>
+            <option *ngFor="let client of clients" [value]="client.id">
+              {{ client.firstName }} {{ client.lastName }}
+            </option>
+          </select>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
+          <button
+            type="button"
+            (click)="closeModal()"
+            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="isLoading"
+            class="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+            {{ isLoading ? 'Salvando...' : isEditMode ? 'Atualizar' : 'Cadastrar' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
