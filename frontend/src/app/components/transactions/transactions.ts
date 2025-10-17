@@ -169,6 +169,21 @@ export class TransactionsComponent implements OnInit {
     }
   }
 
+  payTransaction(id: string): void {
+    if (confirm('Deseja realmente marcar esta transação como paga?')) {
+      this.transactionService.payTransaction(id).subscribe({
+        next: () => {
+          this.loadTransactions();
+          alert('Transação paga com sucesso!');
+        },
+        error: (error) => {
+          console.error('Erro ao pagar transação:', error);
+          alert('Erro ao pagar transação. Tente novamente.');
+        }
+      });
+    }
+  }
+
   nextPage(): void {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;

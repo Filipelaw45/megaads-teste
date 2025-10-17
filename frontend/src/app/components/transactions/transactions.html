@@ -139,7 +139,7 @@
             >
               <td class="px-6 py-4 text-sm text-gray-900">{{ transaction.description }}</td>
               <td class="px-6 py-4 text-sm text-gray-600">
-                {{ transaction.client.firstName + ' ' + transaction.client.lastName }}
+                {{ transaction.client.firstName }} {{ transaction.client.lastName }}
               </td>
               <td class="px-6 py-4 text-sm">
                 <span
@@ -179,6 +179,14 @@
               </td>
               <td class="px-6 py-4 text-sm">
                 <div class="flex gap-2">
+                  <button
+                    *ngIf="transaction.status === TransactionStatus.PENDING"
+                    (click)="payTransaction(transaction.id)"
+                    class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-150"
+                    title="Pagar"
+                  >
+                    <i class="fas fa-check cursor-pointer">Pagar</i>
+                  </button>
                   <button
                     (click)="openEditModal(transaction)"
                     class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-150"
