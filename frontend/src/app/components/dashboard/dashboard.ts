@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { TransactionService } from '../../services/transaction.service';
-import { Transaction, TransactionKind, TransactionStatus } from '../../models/transaction.model';
+import { TransactionKind, TransactionStatus } from '../../models/transaction.model';
 import { SidebarComponent } from '../layout/sidebar/sidebar';
 import { forkJoin } from 'rxjs';
 
@@ -17,24 +17,20 @@ interface DashboardStats {
   standalone: true,
   imports: [CommonModule, SidebarComponent],
   templateUrl: './dashboard.html',
-  styleUrls: ['./dashboard.css']
+  styleUrls: ['./dashboard.css'],
 })
 export class DashboardComponent implements OnInit {
-  // Expor enums para o template
   TransactionKind = TransactionKind;
   TransactionStatus = TransactionStatus;
 
   stats: DashboardStats = {
     totalReceivable: 0,
     totalPayable: 0,
-    totalOverdue: 0
+    totalOverdue: 0,
   };
   isLoading = true;
 
-  constructor(
-    private transactionService: TransactionService,
-    private router: Router
-  ) {}
+  constructor(private transactionService: TransactionService, private router: Router) {}
 
   ngOnInit(): void {
     this.loadDashboardData();
@@ -43,7 +39,6 @@ export class DashboardComponent implements OnInit {
   loadDashboardData(): void {
     this.isLoading = true;
 
-    // Buscar todas as transações pendentes em paralelo
     forkJoin({
       receivable: this.transactionService.getTransactions(
         TransactionKind.RECEIVABLE,
@@ -71,16 +66,14 @@ export class DashboardComponent implements OnInit {
         undefined,
         1,
         1000
-      )
+      ),
     }).subscribe({
       next: (results) => {
-        // Calcular total a receber - somar todos os amounts
         this.stats.totalReceivable = results.receivable.data.reduce(
           (sum, transaction) => sum + parseFloat(transaction.amount.toString()),
           0
         );
 
-        // Calcular total a pagar - somar todos os amounts
         this.stats.totalPayable = results.payable.data.reduce(
           (sum, transaction) => sum + parseFloat(transaction.amount.toString()),
           0
@@ -91,7 +84,7 @@ export class DashboardComponent implements OnInit {
         today.setHours(0, 0, 0, 0);
 
         this.stats.totalOverdue = results.allPending.data
-          .filter(transaction => {
+          .filter((transaction) => {
             const dueDate = new Date(transaction.dueDate);
             dueDate.setHours(0, 0, 0, 0);
             return dueDate < today;
@@ -103,7 +96,7 @@ export class DashboardComponent implements OnInit {
       error: (error) => {
         console.error('Erro ao carregar dados do dashboard:', error);
         this.isLoading = false;
-      }
+      },
     });
   }
 
@@ -111,8 +104,8 @@ export class DashboardComponent implements OnInit {
     this.router.navigate(['/transactions'], {
       queryParams: {
         kind: kind || '',
-        status: status || ''
-      }
+        status: status || '',
+      },
     });
   }
 

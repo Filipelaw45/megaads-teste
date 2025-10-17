@@ -8,15 +8,12 @@
         <p class="text-gray-600 mt-2">Visão geral das suas transações financeiras</p>
       </div>
 
-      <!-- Loading -->
       <div *ngIf="isLoading" class="text-center py-12">
         <i class="fas fa-spinner fa-spin text-4xl text-blue-600 mb-2"></i>
         <p class="text-gray-600 text-lg">Carregando dados...</p>
       </div>
 
-      <!-- Cards de Estatísticas -->
       <div *ngIf="!isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <!-- Card: Total a Receber -->
         <div
           (click)="navigateToTransactions(TransactionKind.RECEIVABLE, TransactionStatus.PENDING)"
           class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200 cursor-pointer border-l-4 border-green-500"
@@ -37,7 +34,6 @@
           </div>
         </div>
 
-        <!-- Card: Total a Pagar -->
         <div
           (click)="navigateToTransactions(TransactionKind.PAYABLE, TransactionStatus.PENDING)"
           class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200 cursor-pointer border-l-4 border-red-500"
@@ -58,7 +54,6 @@
           </div>
         </div>
 
-        <!-- Card: Em Atraso -->
         <div
           (click)="navigateToTransactions(undefined, TransactionStatus.PENDING)"
           class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200 cursor-pointer border-l-4 border-yellow-500"
@@ -80,7 +75,6 @@
         </div>
       </div>
 
-      <!-- Ações Rápidas -->
       <div *ngIf="!isLoading" class="bg-white rounded-lg shadow-md p-6">
         <h2 class="text-xl font-bold text-gray-800 mb-4">Ações Rápidas</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -118,7 +112,6 @@
         </div>
       </div>
 
-      <!-- Resumo -->
       <div *ngIf="!isLoading" class="mt-8 bg-white rounded-lg shadow-md p-6">
         <h2 class="text-xl font-bold text-gray-800 mb-4">Resumo Financeiro</h2>
         <div class="space-y-3">
