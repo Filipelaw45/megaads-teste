@@ -28,8 +28,8 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import {
   ErrorResponseDto,
   UnauthorizedErrorResponseDto,
-  ConflictErrorResponseDto,
 } from '../shared/error-response.dto';
+import { Roles } from 'src/decorators/roles.decorator';
 
 @ApiTags('Transactions')
 @ApiBearerAuth()
@@ -39,6 +39,7 @@ export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
   @Post()
+  @Roles('ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Criar uma nova transação',
@@ -219,6 +220,7 @@ export class TransactionsController {
   }
 
   @Delete(':id')
+  @Roles('ADMIN')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Deletar transação',
