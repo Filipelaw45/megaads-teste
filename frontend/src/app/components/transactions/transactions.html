@@ -300,7 +300,7 @@
             </select>
           </div>
 
-          <div>
+          <div *ngIf="isEditMode">
             <label class="block text-sm font-medium text-gray-700 mb-2">Status *</label>
             <select
               formControlName="status"

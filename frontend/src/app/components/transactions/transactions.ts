@@ -44,7 +44,7 @@ export class TransactionsComponent implements OnInit {
       amount: ['', [Validators.required, Validators.min(0.01)]],
       dueDate: ['', Validators.required],
       kind: [TransactionKind.RECEIVABLE, Validators.required],
-      status: [TransactionStatus.PENDING, Validators.required],
+      status: [TransactionStatus.PENDING],
       clientId: ['']
     });
   }
@@ -137,10 +137,19 @@ export class TransactionsComponent implements OnInit {
       return;
     }
 
-    const transactionData = {
-      ...this.transactionForm.value,
-      clientId: this.transactionForm.value.clientId || null
+    const formValue = this.transactionForm.value;
+
+    const transactionData: Partial<Transaction> = {
+      description: formValue.description,
+      amount: formValue.amount,
+      dueDate: formValue.dueDate,
+      kind: formValue.kind,
+      clientId: formValue.clientId || null
     };
+
+    if (this.isEditMode) {
+      transactionData.status = formValue.status;
+    }
 
     if (this.isEditMode && this.selectedTransactionId) {
       this.transactionService.updateTransaction(this.selectedTransactionId, transactionData).subscribe({
